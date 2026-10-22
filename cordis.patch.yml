@@ -1,0 +1,4 @@
+# Adds only this theme; native sidebar, composer, settings and tool approval stay registered.
+- insert:
+    - id: ui-control-room
+      name: dsh-control-room

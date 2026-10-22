@@ -1,0 +1,10 @@
+{
+  "version": "0.1.9",
+  "targetDsh": "0.2.1-rc.2",
+  "files": {
+    "lib/client.js": "860e36c154e15cab44a7a81c79dd62e793cbb908687582a4f3202be2c04d68c5",
+    "lib/index.js": "d050eac4c4014c53427d51e5883e65e47eea6c5cbfd5f37037a63d3dbee33568",
+    "cordis.patch.yml": "e675f6e92cd4441da6487ce8e0044bb114962132e9082cccda57e8b7d0b64aa4",
+    "package.json": "45de655b6f0e34d28adf8c523860c24f56eb566a9b5d6f77405b23c1b5ce2074"
+  }
+}
