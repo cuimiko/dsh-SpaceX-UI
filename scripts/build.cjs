@@ -1,0 +1,17 @@
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const base=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(base,p),'utf8');
+const version=JSON.parse(read('package.json')).version;
+const asset=(p,type)=>'data:'+type+';base64,'+fs.readFileSync(path.join(base,'assets',p)).toString('base64');
+const font=asset('D-DIN.woff2','font/woff2');
+const room=asset('control-room-glass-v3-photo.png','image/png');
+let css=read('src/theme.css').replaceAll('__ROOM__',room).replaceAll('__FONT__',font);
+let hud=['metrics.js','geometry.js','hud.js'].map(p=>read('src/hud/'+p)).join('\n');
+hud=hud.replaceAll('DshHudMetrics','DshControlRoomMetrics').replaceAll('DshHudGeometry','DshControlRoomGeometry').replaceAll('DshHudUtils','DshControlRoomUtils').replaceAll('dsh-mission-hud','dsh-control-room-hud').replaceAll('DDIN','DshControlRoomDIN');
+hud=hud.replace("${new URL('assets/D-DIN.woff2',scriptRoot)}",font);
+const constants='const THEME_CSS='+JSON.stringify(css)+';\nconst LEFT_PORTRAIT='+JSON.stringify(asset('presenter-left.png','image/png'))+';\nconst RIGHT_PORTRAIT='+JSON.stringify(asset('presenter-right.png','image/png'))+';\n';
+const runtime=constants+'\n(function(module){'+read('src/adapter.cjs')+'\n'+read('src/layout.cjs')+'\n'+read('src/composer.cjs')+'})(undefined);\nfunction installHud(){if(!customElements.get("dsh-control-room-hud")){(function(module){'+hud+'})(undefined);}}\n'+read('src/client.js');
+const client='/* DSH control room '+version+'. Generated; edit src/ and rebuild. */\nwindow.__ModuleLoader__.load({id:"dsh-control-room",factory:(require)=>{const module={exports:{}};const exports=module.exports;\n'+runtime+'\nreturn module.exports;}});\n';
+fs.mkdirSync(path.join(base,'lib'),{recursive:true});fs.writeFileSync(path.join(base,'lib/client.js'),client);fs.copyFileSync(path.join(base,'src/index.js'),path.join(base,'lib/index.js'));
+const hashes={};for(const p of ['lib/client.js','lib/index.js','cordis.patch.yml','package.json'])hashes[p]=crypto.createHash('sha256').update(fs.readFileSync(path.join(base,p))).digest('hex');
+fs.writeFileSync(path.join(base,'build-info.json'),JSON.stringify({version,targetDsh:'0.2.1-rc.2',files:hashes},null,2)+'\n');
+console.log('Built native DSH client plugin:',Buffer.byteLength(client),'bytes; no remote assets.');
